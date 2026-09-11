@@ -17,15 +17,14 @@ export const LEAVE_DELAY = 0;
 export const MARK = "_";
 
 export const ITEM_MAX_NUMS = 100;
+export const IMAGE_MAX_SIZE = 2 * 1024 * 1024;
+export const IMAGE_TYPES = ["image/gif", "image/jpeg", "image/png", "image/webp"];
 
 export const DATA_MARKDOWN = "data-markdown";
 export const DATA_ORIGIN = "data-origin";
 export const STORAGE_LAYOUT = "layout";
 export const TEMPLATE_NUM = "templateNum";
 export const MARKDOWN_MODE = "markdownMode";
-
-export const SM_MS_PROXY =
-  "https://cors-anywhere.herokuapp.com/https://sm.ms/api/upload";
 
 // 帮助信息
 export const HELP_USE = `

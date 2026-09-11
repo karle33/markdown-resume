@@ -68,6 +68,31 @@ class Resume {
     window.localStorage.setItem(STORAGE_LAYOUT, JSON.stringify(this.layout));
   };
 
+  @action
+  setPicture = dataUrl => {
+    const key = this.choosenKey;
+    if (!key) {
+      throw new Error("请先选择要放置图片的网格");
+    }
+
+    const layout = this.layout.map(item => {
+      if (item.i !== key) {
+        return item;
+      }
+      return Object.assign({}, item, {
+        value: `![avatar](${dataUrl})`,
+        origin: `<section><p><img src="${dataUrl}" alt="avatar"></p>\n</section>`
+      });
+    });
+
+    if (!layout.some(item => item.i === key)) {
+      throw new Error("没有找到所选网格");
+    }
+
+    window.localStorage.setItem(STORAGE_LAYOUT, JSON.stringify(layout));
+    this.layout = layout;
+  };
+
   // 编辑器信息修改后
   @action
   updateResume = () => {

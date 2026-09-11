@@ -4,16 +4,14 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
 import Button from "@material-ui/core/Button";
-import axios from "axios";
 
 import picture from "../../icons/picture.svg";
 
 import {
   ENTER_DELAY,
   LEAVE_DELAY,
-  DATA_MARKDOWN,
-  DATA_ORIGIN,
-  SM_MS_PROXY
+  IMAGE_MAX_SIZE,
+  IMAGE_TYPES
 } from "../../utils/constant";
 
 import { observer, inject } from "mobx-react";
@@ -26,35 +24,46 @@ class Picture extends Component {
   /**
    * 上传图片
    */
-  uploadPicture = async ({ target }) => {
-    const file = document.getElementById("uploadImage");
-    const formData = new FormData();
-    formData.append("smfile", file.files[0]);
+  uploadPicture = ({ target }) => {
+    const file = target.files[0];
+    target.value = "";
 
-    const result = await axios.post(SM_MS_PROXY, formData);
-    if (result.data.message === "Image upload repeated limit.") {
+    if (!file) {
+      return;
+    }
+    if (!IMAGE_TYPES.includes(file.type)) {
       this.props.hint.setError({
         isOpen: true,
-        message: "同一张图片无法上传多次"
+        message: "仅支持 JPG、PNG、GIF 或 WebP 图片"
       });
-    } else {
-      const id = this.props.resume.choosenKey;
-      console.log(id);
-      const element = document.getElementById(id);
-
-      const { isMarkdownMode } = this.props.navbar;
-      let content;
-      if (isMarkdownMode) {
-        content = `![avatar](${result.data.data.url})`;
-        element.childNodes[0].innerText = content;
-        element.setAttribute(DATA_MARKDOWN, content);
-      } else {
-        content = `<section><p><img src="${result.data.data.url}" alt="avatar"></p>\n</section>`
-        element.childNodes[0].innerHTML = content;
-        element.setAttribute(DATA_ORIGIN, content);
-      }
-     
+      return;
     }
+    if (file.size > IMAGE_MAX_SIZE) {
+      this.props.hint.setError({
+        isOpen: true,
+        message: "图片不能超过 2 MB"
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => {
+      this.props.hint.setError({ isOpen: true, message: "图片读取失败" });
+    };
+    reader.onload = () => {
+      try {
+        this.props.resume.setPicture(reader.result);
+        this.props.hint.setSuccess({ isOpen: true, message: "图片已添加" });
+      } catch (error) {
+        this.props.hint.setError({
+          isOpen: true,
+          message: error.name === "QuotaExceededError"
+            ? "图片过大，浏览器存储空间不足"
+            : error.message || "图片添加失败"
+        });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   stopPropagation = event => {

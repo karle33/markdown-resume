@@ -93,6 +93,48 @@ export const generateItem = (key, value = "") => {
 };
 
 /**
+ * 解析并校验从本地导入的简历布局。
+ */
+export const parseImportedLayout = content => {
+  let layout;
+  try {
+    layout = JSON.parse(content);
+  } catch (error) {
+    throw new Error("文件不是有效的 JSON 格式");
+  }
+
+  if (!Array.isArray(layout)) {
+    throw new Error("文件不包含有效的简历布局");
+  }
+
+  const keys = new Set();
+  const isValid = layout.every(item => {
+    if (
+      !item ||
+      typeof item !== "object" ||
+      typeof item.i !== "string" ||
+      !/^item_\d+$/.test(item.i) ||
+      keys.has(item.i) ||
+      ![item.x, item.y, item.w, item.h].every(Number.isFinite) ||
+      item.w <= 0 ||
+      item.h <= 0 ||
+      typeof item.value !== "string" ||
+      typeof item.origin !== "string"
+    ) {
+      return false;
+    }
+    keys.add(item.i);
+    return true;
+  });
+
+  if (!isValid) {
+    throw new Error("文件中的简历布局格式不正确");
+  }
+
+  return layout;
+};
+
+/**
  * 深拷贝
  * @param {} source
  */

@@ -123,8 +123,8 @@
       "node"
     ],
     "watchPlugins": [
-      "/Users/aaron/Code/markdown-resume/node_modules/jest-watch-typeahead/filename.js",
-      "/Users/aaron/Code/markdown-resume/node_modules/jest-watch-typeahead/testname.js"
+      "jest-watch-typeahead/filename",
+      "jest-watch-typeahead/testname"
     ]
   },
   "babel": {

@@ -11,12 +11,14 @@ import Tooltip from "@material-ui/core/Tooltip";
 import corner from "../../icons/corner.svg";
 
 import { ENTER_DELAY, LEAVE_DELAY, STORAGE_LAYOUT } from "../../utils/constant";
-import { downloadFile } from "../../utils/helper";
+import { downloadFile, parseImportedLayout } from "../../utils/helper";
 
 import { observer, inject } from "mobx-react";
 
 @inject("navbar")
 @inject("dialog")
+@inject("resume")
+@inject("hint")
 @observer
 class Export extends Component {
   state = {
@@ -50,16 +52,30 @@ class Export extends Component {
   importFromLocal = event => {
     event.stopPropagation();
     const file = event.target.files[0];
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
     this.fileReader = new FileReader();
-    this.fileReader.onloadend = this.handleFileRead;
+    this.fileReader.onload = this.handleFileRead;
+    this.fileReader.onerror = () => {
+      this.props.hint.setError({ isOpen: true, message: "文件读取失败" });
+    };
     this.fileReader.readAsText(file);
     this.setState({ exportAnchorEl: null });
   };
 
-  handleFileRead = e => {
-    const content = this.fileReader.result;
-    window.localStorage.setItem(STORAGE_LAYOUT, content);
-    window.location.href = "/";
+  handleFileRead = () => {
+    try {
+      const layout = parseImportedLayout(this.fileReader.result);
+      this.props.resume.switchLayout(layout);
+      this.props.hint.setSuccess({ isOpen: true, message: "简历导入成功" });
+    } catch (error) {
+      this.props.hint.setError({
+        isOpen: true,
+        message: error.message || "简历导入失败"
+      });
+    }
   };
 
   openHelpDialog = event => {
