@@ -2,6 +2,8 @@
   "name": "markdown-resume",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://karle33.github.io/markdown-resume",
+  "packageManager": "yarn@1.22.22",
   "dependencies": {
     "@babel/core": "7.2.2",
     "@material-ui/core": "^3.9.2",
