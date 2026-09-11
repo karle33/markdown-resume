@@ -13,6 +13,7 @@ import {
   DATA_MARKDOWN,
   DATA_ORIGIN
 } from "../../utils/constant";
+import { toggleThemeText } from "../../utils/themeFormat";
 
 import { observer, inject } from "mobx-react";
 
@@ -37,51 +38,56 @@ class Bucket extends Component {
 
   updateMarkdown = id => {
     const element = document.getElementById(id);
-    let content = element.getAttribute(DATA_MARKDOWN);
+    const content = element.getAttribute(DATA_MARKDOWN);
     const selectValue = window.getSelection().toString();
-    if (selectValue) {
-      const index = content.indexOf(selectValue);
-      content =
-        content.slice(0, index) +
-        "`" +
-        selectValue +
-        "`" +
-        content.slice(index + selectValue.length);
-    } else {
-      content = `${content}\`\``;
+    if (!selectValue) {
+      this.props.hint.setError({
+        isOpen: true,
+        message: "请选择文本"
+      });
+      return;
+    }
+
+    const updatedContent = toggleThemeText(content, selectValue, "`");
+    if (updatedContent === null) {
+      this.showOverlapError();
+      return;
     }
     // 更新markdown内容
-    element.childNodes[0].innerText = content;
-    element.setAttribute(DATA_MARKDOWN, content);
+    element.childNodes[0].innerText = updatedContent;
+    element.setAttribute(DATA_MARKDOWN, updatedContent);
   };
 
   updateNormal = id => {
     const element = document.getElementById(id);
-    let content = element.getAttribute(DATA_ORIGIN);
+    const content = element.getAttribute(DATA_ORIGIN);
     const selectValue = window.getSelection().toString();
     if (selectValue) {
-      const index = content.indexOf(selectValue);
-      if (index === -1) {
-        this.props.hint.setError({
-          isOpen: true,
-          message: "主题色位置请不要与其他加粗、主题色和链接位置重合"
-        });
+      const updatedContent = toggleThemeText(
+        content,
+        selectValue,
+        "<code>",
+        "</code>"
+      );
+      if (updatedContent === null) {
+        this.showOverlapError();
         return;
       }
-      content =
-        content.slice(0, index) +
-        "<code>" +
-        selectValue +
-        "</code>" +
-        content.slice(index + selectValue.length);
-      element.childNodes[0].innerHTML = content;
-      element.setAttribute(DATA_ORIGIN, content);
+      element.childNodes[0].innerHTML = updatedContent;
+      element.setAttribute(DATA_ORIGIN, updatedContent);
     } else {
       this.props.hint.setError({
         isOpen: true,
         message: "请选择文本"
       });
     }
+  };
+
+  showOverlapError = () => {
+    this.props.hint.setError({
+      isOpen: true,
+      message: "主题色位置请不要与其他加粗、主题色和链接位置重合"
+    });
   };
 
   render() {
