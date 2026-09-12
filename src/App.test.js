@@ -15,3 +15,15 @@ it('renders without crashing', () => {
   ReactDOM.render(<App resume={resume} navbar={navbar} />, div);
   ReactDOM.unmountComponentAtNode(div);
 });
+
+it('hides the resume scrollbar while exporting', () => {
+  const div = document.createElement('div');
+  navbar.setExported(true);
+
+  ReactDOM.render(<App resume={resume} navbar={navbar} />, div);
+
+  expect(div.querySelector('main').style.overflow).toBe('hidden');
+
+  ReactDOM.unmountComponentAtNode(div);
+  navbar.setExported(false);
+});
